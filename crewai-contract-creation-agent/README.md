@@ -71,8 +71,8 @@ python main.py api
 
 Send a POST request to `/start_job` with your contract details:
 
-       ```json
-       {
+```json
+{
     "contract_type": "freelance",
     "company_name": "Cool Tech Inc",
     "company_address": "123 Startup St, SF",
