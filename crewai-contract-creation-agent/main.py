@@ -7,7 +7,8 @@ from pydantic import BaseModel
 from datetime import datetime, timezone
 from masumi_crewai.config import Config
 from masumi_crewai.payment import Payment, Amount
-from crew_definition import ResearchCrew
+from crew_definition import ResearchCrew, ContractCreationCrew, ContractDetails, ContractType
+from typing import Optional
 
 # Load environment variables
 load_dotenv(override=True)
@@ -38,7 +39,20 @@ config = Config(
 # Pydantic Models
 # ─────────────────────────────────────────────────────────────────────────────
 class StartJobRequest(BaseModel):
-    text: str
+    contract_type: ContractType
+    company_name: str
+    company_address: str
+    party_name: str
+    party_address: str
+    party_email: str
+    start_date: str
+    end_date: Optional[str] = None
+    salary: Optional[float] = None
+    hourly_rate: Optional[float] = None
+    project_scope: Optional[str] = None
+    confidentiality_period: Optional[str] = None
+    jurisdiction: str = "California, USA"
+    additional_terms: Optional[str] = None
 
 class ProvideInputRequest(BaseModel):
     job_id: str
@@ -46,10 +60,11 @@ class ProvideInputRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 # CrewAI Task Execution
 # ─────────────────────────────────────────────────────────────────────────────
-async def execute_crew_task(input_data: str) -> str:
-    """ Execute a CrewAI task with Research and Writing Agents """
-    crew = ResearchCrew()
-    result = crew.crew.kickoff({"text": input_data})
+async def execute_crew_task(data: StartJobRequest) -> dict:
+    """ Execute a CrewAI task with Contract Creation Agents """
+    crew = ContractCreationCrew()
+    contract_details = ContractDetails(**data.dict())
+    result = crew.process_contract(contract_details)
     return result
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -83,7 +98,7 @@ async def start_job(data: StartJobRequest):
         "status": "awaiting_payment",
         "payment_status": "pending",
         "payment_id": payment_id,
-        "input_data": data.text,
+        "input_data": data.dict(),
         "result": None
     }
 
@@ -122,8 +137,8 @@ async def handle_payment_status(job_id: str, payment_id: str) -> None:
     result = await execute_crew_task(jobs[job_id]["input_data"])
     print(f"Crew task completed for job {job_id}")
 
-    # Convert result to string if it's not already
-    result_str = str(result)
+    # Convert result content to string if it's not already
+    result_str = str(result["content"])
     
     # Mark payment as completed on Masumi
     # Use a shorter string for the result hash
@@ -134,7 +149,8 @@ async def handle_payment_status(job_id: str, payment_id: str) -> None:
     # Update job status
     jobs[job_id]["status"] = "completed"
     jobs[job_id]["payment_status"] = "completed"
-    jobs[job_id]["result"] = result
+    jobs[job_id]["result"] = result["content"]
+    jobs[job_id]["pdf_path"] = result["pdf_path"]
 
     # Stop monitoring payment status
     if job_id in payment_instances:
@@ -166,7 +182,8 @@ async def get_status(job_id: str):
         "job_id": job_id,
         "status": job["status"],
         "payment_status": job["payment_status"],
-        "result": job.get("result")
+        "result": job.get("result"),
+        "pdf_path": job.get("pdf_path")
     }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -187,15 +204,73 @@ async def check_availability():
 async def input_schema():
     """
     Returns the expected input schema for the /start_job endpoint.
-    Fulfills MIP-003 /input_schema endpoint.
     """
-    # Example response defining the accepted key-value pairs
-    schema_example = {
-        "input_data": [
-            {"key": "text", "value": "string"}
-        ]
+    return {
+        "input_schema": {
+            "contract_type": {
+                "type": "string",
+                "enum": ["nda", "freelance", "employment"],
+                "required": True
+            },
+            "company_name": {
+                "type": "string",
+                "required": True
+            },
+            "company_address": {
+                "type": "string",
+                "required": True
+            },
+            "party_name": {
+                "type": "string",
+                "required": True
+            },
+            "party_address": {
+                "type": "string",
+                "required": True
+            },
+            "party_email": {
+                "type": "string",
+                "required": True
+            },
+            "start_date": {
+                "type": "string",
+                "required": True
+            },
+            "end_date": {
+                "type": "string",
+                "required": False
+            },
+            "salary": {
+                "type": "number",
+                "required": False,
+                "description": "Required for employment contracts"
+            },
+            "hourly_rate": {
+                "type": "number",
+                "required": False,
+                "description": "Required for freelance contracts"
+            },
+            "project_scope": {
+                "type": "string",
+                "required": False,
+                "description": "Required for freelance contracts"
+            },
+            "confidentiality_period": {
+                "type": "string",
+                "required": False,
+                "description": "Required for NDAs"
+            },
+            "jurisdiction": {
+                "type": "string",
+                "required": False,
+                "default": "California, USA"
+            },
+            "additional_terms": {
+                "type": "string",
+                "required": False
+            }
+        }
     }
-    return schema_example
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 6) Health Check

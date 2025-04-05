@@ -33,4 +33,14 @@ wheels/
 *.swo
 
 # Project specific
-job_results/ 
+job_results/
+generated_contracts/
+
+# Crew
+.crew/
+.crew-env/
+.crew-venv/
+venv/
+ENV/
+
+# ... rest of the file remains unchanged ... 
