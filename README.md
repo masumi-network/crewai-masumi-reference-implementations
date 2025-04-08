@@ -6,9 +6,9 @@ This repository contains production-ready reference implementations for integrat
 
 | Agent | Description | Status |
 |-------|-------------|--------|
-| [Contract Creation Agent](./crewai-contract-creation-agent) | Generate legal contracts with specialized agents | Ready ✅ |
-| [Dashboard Agent](./crewai-dashboard-agent) | Create interactive dashboard reports | Ready ✅ |
-| [SEO Agent](./crewai-seo-agent) | Optimize content and analyze SEO performance | Ready ✅ |
+| [Contract Creation Agent](./crewai-contract-creation-agent) | Generate legal contracts with specialized agents | In Development 🔧 |
+| [Dashboard Agent](./crewai-dashboard-agent) | Create interactive dashboard reports | In Development 🔧 |
+| [SEO Agent](./crewai-seo-agent) | Optimize content and analyze SEO performance | In Development 🔧 |
 
 ## 🎯 Purpose
 
