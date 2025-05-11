@@ -19,6 +19,7 @@ load_dotenv(override=True)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL")
 PAYMENT_API_KEY = os.getenv("PAYMENT_API_KEY")
+NETWORK = os.getenv("NETWORK")
 
 logger.info("Starting application with configuration:")
 logger.info(f"PAYMENT_SERVICE_URL: {PAYMENT_SERVICE_URL}")
@@ -50,13 +51,13 @@ config = Config(
 class StartJobRequest(BaseModel):
     identifier_from_purchaser: str
     input_data: dict[str, str]
-
+    
     class Config:
         json_schema_extra = {
             "example": {
                 "identifier_from_purchaser": "example_purchaser_123",
                 "input_data": {
-                    "text": "Write a story about a robot learning to paint"
+                    "text": "https://masumi.network"
                 }
             }
         }
@@ -68,11 +69,11 @@ class ProvideInputRequest(BaseModel):
 # CrewAI Task Execution
 # ─────────────────────────────────────────────────────────────────────────────
 async def execute_crew_task(input_data: str) -> str:
-    """ Execute a CrewAI task with Research and Writing Agents """
-    logger.info(f"Starting CrewAI task with input: {input_data}")
-    crew = ResearchCrew(logger=logger)
-    result = crew.crew.kickoff(inputs={"text": input_data})
-    logger.info("CrewAI task completed successfully")
+    """ Execute a CrewAI task with SEO Analysis Crew """
+    logger.info(f"Starting SEO Analysis task with input: {input_data}")
+    crew = SEOAnalysisCrew(website_url=input_data, logger=logger)
+    result = crew.run()
+    logger.info("SEO Analysis task completed successfully")
     return result
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -81,6 +82,8 @@ async def execute_crew_task(input_data: str) -> str:
 @app.post("/start_job")
 async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
+    print(f"Received data: {data}")
+    print(f"Received data.input_data: {data.input_data}")
     try:
         job_id = str(uuid.uuid4())
         agent_identifier = os.getenv("AGENT_IDENTIFIER")
@@ -104,7 +107,8 @@ async def start_job(data: StartJobRequest):
             #amounts=amounts,
             config=config,
             identifier_from_purchaser=data.identifier_from_purchaser,
-            input_data=data.input_data
+            input_data=data.input_data,
+            network=NETWORK
         )
         
         logger.info("Creating payment request...")
@@ -168,19 +172,16 @@ async def handle_payment_status(job_id: str, payment_id: str) -> None:
         
         # Update job status to running
         jobs[job_id]["status"] = "running"
-        logger.info(f"Input data: {jobs[job_id]['input_data']}")
+        logger.info(f"Input data: {jobs[job_id]["input_data"]}")
 
         # Execute the AI task
         result = await execute_crew_task(jobs[job_id]["input_data"])
+        result_dict = result.json_dict
         logger.info(f"Crew task completed for job {job_id}")
-
-        # Convert result to string if it's not already
-        result_str = str(result)
         
         # Mark payment as completed on Masumi
         # Use a shorter string for the result hash
-        result_hash = result_str[:64] if len(result_str) >= 64 else result_str
-        await payment_instances[job_id].complete_payment(payment_id, result_hash)
+        await payment_instances[job_id].complete_payment(payment_id, result_dict)
         logger.info(f"Payment completed for job {job_id}")
 
         # Update job status
@@ -228,11 +229,15 @@ async def get_status(job_id: str):
             logger.error(f"Error checking payment status: {str(e)}", exc_info=True)
             job["payment_status"] = "error"
 
+
+    result_data = job.get("result")
+    result = result_data.raw if result_data and hasattr(result_data, "raw") else None
+
     return {
         "job_id": job_id,
         "status": job["status"],
         "payment_status": job["payment_status"],
-        "result": job.get("result")
+        "result": result
     }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -241,11 +246,7 @@ async def get_status(job_id: str):
 @app.get("/availability")
 async def check_availability():
     """ Checks if the server is operational """
-    return {
-        "status": "available",
-        "agentIdentifier": os.getenv("AGENT_IDENTIFIER"),
-        "message": "The server is running smoothly."
-    }
+    return {"status": "available", "type": "masumi-agent", "message": "The server is running smoothly."}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5) Retrieve Input Schema (MIP-003: /input_schema)
@@ -261,10 +262,10 @@ async def input_schema():
             {
                 "id": "text",
                 "type": "string",
-                "name": "Task Description",
+                "name": "Website URL",
                 "data": {
-                    "description": "The text input for the AI task",
-                    "placeholder": "Enter your task description here"
+                    "description": "The URL of the website to analyze",
+                    "placeholder": "Enter the website URL to analyze"
                 }
             }
         ]

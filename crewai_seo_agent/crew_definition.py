@@ -295,3 +295,34 @@ class SEOAnalysisCrew():
         except Exception as e:
             self.logger.error(f"Error during SEO analysis: {str(e)}")
             return str(e)
+
+if __name__ == "__main__":
+    # Test the SEO Analysis Crew with masumi.network
+    test_url = "https://www.masumi.network/"
+    print(f"Testing SEO Analysis Crew with {test_url}")
+    
+    try:
+        # Check for required environment variables
+        if not os.getenv('OPENAI_API_KEY'):
+            raise ValueError("OPENAI_API_KEY environment variable is not set")
+        if not os.getenv('BROWSERLESS_API_KEY'):
+            raise ValueError("BROWSERLESS_API_KEY environment variable is not set")
+            
+        # Initialize the crew
+        seo_crew = SEOAnalysisCrew(website_url=test_url, verbose=True)
+        
+        # Run the analysis
+        print("Starting SEO analysis...")
+        result = seo_crew.run()
+        
+        # Print the results
+        print("\n=== SEO ANALYSIS RESULTS ===\n")
+        print(result)
+        print("\n=== ANALYSIS COMPLETE ===")
+        
+    except Exception as e:
+        print(f"\nError: {str(e)}")
+        print("\nPlease make sure you have:")
+        print("1. Set up your .env file with required API keys")
+        print("2. Installed all required dependencies")
+        print("3. Have a working internet connection")

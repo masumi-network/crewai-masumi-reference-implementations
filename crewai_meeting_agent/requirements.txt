@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-dotenv
+crewai
+crewai-tools
+openai
+masumi
+pydantic
+python-multipart
+httpx
+openai
+requests
+markdown
