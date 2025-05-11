@@ -363,7 +363,7 @@ async def input_schema():
             },
             {
                 "id": "attendees",
-                "type": "text",
+                "type": "string",
                 "name": "Attendees",
                 "data": {
                     "description": "List of attendees and their roles (one per line)",
@@ -372,7 +372,7 @@ async def input_schema():
             },
             {
                 "id": "meeting_duration",
-                "type": "number",
+                "type": "string",
                 "name": "Meeting Duration",
                 "data": {
                     "description": "Meeting duration in minutes",
@@ -382,7 +382,7 @@ async def input_schema():
             },
             {
                 "id": "focus_areas",
-                "type": "text",
+                "type": "string",
                 "name": "Focus Areas",
                 "data": {
                     "description": "Specific areas of focus or concerns",
@@ -391,7 +391,7 @@ async def input_schema():
             },
             {
                 "id": "reference_links",
-                "type": "text",
+                "type": "string",
                 "name": "Reference Links",
                 "data": {
                     "description": "Optional list of reference links to include in the preparation (one per line)",
