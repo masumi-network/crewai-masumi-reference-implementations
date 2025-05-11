@@ -56,13 +56,20 @@ class MeetingPrepInput(BaseModel):
     attendees: str = Field(..., description="List of attendees and their roles (one per line)")
     meeting_duration: int = Field(default=60, description="Meeting duration in minutes")
     focus_areas: str = Field(default="", description="Specific areas of focus or concerns")
-    reference_links: list[str] = Field(default=None, description="Optional list of reference links to include in the preparation")
+    reference_links: str = Field(default="", description="Optional list of reference links to include in the preparation (one per line)")
     
     @field_validator('meeting_duration')
     def validate_meeting_duration(cls, v):
         if v <= 0:
             raise ValueError('meeting_duration must be a positive integer')
         return v
+    
+    @property
+    def reference_links_list(self) -> list[str]:
+        """Convert the newline-separated string of links into a list"""
+        if not self.reference_links:
+            return []
+        return [link.strip() for link in self.reference_links.split('\n') if link.strip()]
 
 class StartJobRequest(BaseModel):
     identifier_from_purchaser: str
@@ -384,12 +391,11 @@ async def input_schema():
             },
             {
                 "id": "reference_links",
-                "type": "array",
+                "type": "text",
                 "name": "Reference Links",
                 "data": {
-                    "description": "Optional list of reference links to include in the preparation",
-                    "itemType": "string",
-                    "placeholder": "https://masumi.network/about"
+                    "description": "Optional list of reference links to include in the preparation (one per line)",
+                    "placeholder": "https://masumi.network/about\nhttps://dev.sokosumi.com\nhttps://sokosumi.com"
                 }
             }
         ]
