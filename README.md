@@ -25,6 +25,66 @@ All agents are intended for deployment and can be made available on platforms li
 - Core agent logic and CrewAI definitions typically found in `agent_definition.py` or `crew_definition.py`.
 - Common utilities for logging (e.g., `logging_config.py`) and environment configuration.
 
+### Example Agent Interaction with Masumi API
+
+The following diagram illustrates a typical interaction flow between a client (purchaser), an agent service (hosted via FastAPI), and the Masumi Payment Service:
+
+```mermaid
+sequenceDiagram
+    participant Client (Purchaser)
+    participant Agent API (FastAPI)
+    participant Masumi Payment Service
+    participant Agent Core Logic (e.g., CrewAI)
+
+    Client->>Agent API: POST /start_job (job_details, purchaser_id)
+    activate Agent API
+    Agent API->>Masumi Payment Service: Create Payment Request (job_details, amount, seller_vkey)
+    activate Masumi Payment Service
+    Masumi Payment Service-->>Agent API: Payment Request Created (blockchain_id, payment_address)
+    deactivate Masumi Payment Service
+    Agent API-->>Client: Job Started (job_id, blockchain_id, payment_address)
+    deactivate Agent API
+
+    Client->>Cardano Blockchain: Submits Payment to payment_address
+    note right of Client: User pays using their Cardano wallet
+
+    Agent API->>Masumi Payment Service: Monitor Payment Status (blockchain_id)
+    activate Agent API
+    activate Masumi Payment Service
+    loop Payment Monitoring
+        Masumi Payment Service-->>Agent API: Payment Status (e.g., pending, confirmed)
+    end
+    Masumi Payment Service-->>Agent API: Payment Confirmed
+    deactivate Masumi Payment Service
+
+    Agent API->>Agent Core Logic: Execute Task (job_details.input_data)
+    activate Agent Core Logic
+    Agent Core Logic-->>Agent API: Task Result
+    deactivate Agent Core Logic
+
+    Agent API->>Masumi Payment Service: Complete Payment (blockchain_id, result_hash/data)
+    activate Masumi Payment Service
+    Masumi Payment Service-->>Agent API: Payment Completion Acknowledged
+    deactivate Masumi Payment Service
+    deactivate Agent API
+
+    Client->>Agent API: GET /status (job_id)
+    activate Agent API
+    Agent API-->>Client: Job Status (completed, result)
+    deactivate Agent API
+```
+
+This diagram shows the key steps:
+1.  The client initiates a job.
+2.  The Agent API creates a payment request with Masumi.
+3.  The client receives payment details and makes the payment on the Cardano blockchain.
+4.  The Agent API monitors the payment status via Masumi.
+5.  Upon confirmation, the agent's core logic executes the task.
+6.  The Agent API informs Masumi of job completion.
+7.  The client can then retrieve the results.
+
+You can find more detailed information about the Masumi protocol and its features in the [Masumi Documentation](https://github.com/masumi-network/masumi-docs).
+
 ## Setup Requirements
 
 ### Prerequisites
