@@ -2,7 +2,6 @@ fastapi
 uvicorn
 python-dotenv
 crewai
-crewai-tools
 openai
 masumi
 pydantic
@@ -11,3 +10,6 @@ httpx
 openai
 requests
 markdown
+crewai-tools
+langfuse
+

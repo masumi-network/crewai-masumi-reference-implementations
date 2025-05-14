@@ -1,12 +1,17 @@
-from crewai import Agent, Task, Crew, LLM
-from crewai.process import Process
+import openai
+from crewai import Agent, Task, Crew, Process
 from crewai_tools import SerperDevTool
 import os
 import dotenv
 from datetime import datetime
+from langfuse.callback import CallbackHandler
+from langchain_openai import ChatOpenAI
+from langfuse.decorators import observe
+import time
+
 dotenv.load_dotenv()
 
-
+@observe(as_type="generation")
 class MeetingPreparationAgent:
     def __init__(
         self,
@@ -20,6 +25,7 @@ class MeetingPreparationAgent:
         """
         Initialize the MeetingPreparationAgent.
         API keys will be read from environment variables if not provided.
+        Langfuse will be initialized for tracing.
         """
         # Set API keys from parameters or environment variables
         self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
@@ -33,13 +39,27 @@ class MeetingPreparationAgent:
         # Set environment variables for the tools to use
         os.environ["SERPER_API_KEY"] = self.serper_api_key
         
-        # Initialize the LLM and search tool
-        self.llm = LLM(model=model, temperature=temperature, api_key=self.openai_api_key)
+        # Initialize Langfuse callback handler explicitly with credentials
+        langfuse_handler = CallbackHandler(
+            public_key=os.getenv('LANGFUSE_PUBLIC_KEY'),
+            secret_key=os.getenv('LANGFUSE_SECRET_KEY'),
+            host=os.getenv('LANGFUSE_HOST')
+        )
+
+        
+        # Initialize the LLM with Langfuse callback
+        self.llm = ChatOpenAI(
+            model=model, # model_name is also an option, but model usually works as an alias
+            temperature=temperature,
+            openai_api_key=self.openai_api_key,
+            callbacks=[langfuse_handler]
+        )
         self.search_tool = SerperDevTool()
         # Store verbosity and process configuration
         self.verbose = verbose
         self.process = process
-        
+
+    @observe()
     def prepare_meeting(self, company_name, meeting_objective, attendees, meeting_duration=60, focus_areas="", reference_links=None):
         """
         Prepare a comprehensive meeting package using AI agents.
@@ -231,6 +251,17 @@ class MeetingPreparationAgent:
         # Run the crew and return the result
         print("AI agents are preparing your meeting...")
         result = meeting_prep_crew.kickoff()
+
+        # Ensure Langfuse sends all data before returning
+        # The langfuse_handler was passed to ChatOpenAI's callbacks list.
+        # ChatOpenAI stores this in self.callbacks.
+        # The MeetingPreparationAgent has the LLM instance as self.llm
+        if hasattr(self.llm, 'callbacks') and self.llm.callbacks:
+            for callback in self.llm.callbacks:
+                if isinstance(callback, CallbackHandler) and hasattr(callback, 'langfuse'):
+                    print("Flushing Langfuse data from prepare_meeting...")
+                    callback.langfuse.flush()
+        
         return result
 
 def main():
@@ -259,6 +290,15 @@ Keanu Klestil, dev"""
             focus_areas=focus,
             reference_links=reference_links
         )
+        
+        # Ensure Langfuse sends all data before script exits
+        # Access the handler through the agent's llm instance
+        if hasattr(agent, 'llm') and hasattr(agent.llm, 'callbacks') and agent.llm.callbacks:
+            for callback in agent.llm.callbacks:
+                if isinstance(callback, CallbackHandler) and hasattr(callback, 'langfuse'):
+                    print("Flushing Langfuse data from main...")
+                    callback.langfuse.flush()
+                    time.sleep(2) # Give a couple of seconds for the flush to complete network requests
         
         # Convert result to string if it's not already
         result_str = str(result)
