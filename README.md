@@ -31,47 +31,47 @@ The following diagram illustrates a typical interaction flow between a client (p
 
 ```mermaid
 sequenceDiagram
-    participant Client (Purchaser)
-    participant Agent API (FastAPI)
-    participant Masumi Payment Service
-    participant Agent Core Logic (e.g., CrewAI)
+    participant Client as Client (Purchaser)
+    participant AgentAPI as Agent API (FastAPI)
+    participant MasumiService as Masumi Payment Service
+    participant CoreLogic as Agent Core Logic (e.g., CrewAI)
 
-    Client->>Agent API: POST /start_job (job_details, purchaser_id)
-    activate Agent API
-    Agent API->>Masumi Payment Service: Create Payment Request (job_details, amount, seller_vkey)
-    activate Masumi Payment Service
-    Masumi Payment Service-->>Agent API: Payment Request Created (blockchain_id, payment_address)
-    deactivate Masumi Payment Service
-    Agent API-->>Client: Job Started (job_id, blockchain_id, payment_address)
-    deactivate Agent API
+    Client->>AgentAPI: POST /start_job (job_details, purchaser_id)
+    activate AgentAPI
+    AgentAPI->>MasumiService: Create Payment Request (job_details, amount, seller_vkey)
+    activate MasumiService
+    MasumiService-->>AgentAPI: Payment Request Created (blockchain_id, payment_address)
+    deactivate MasumiService
+    AgentAPI-->>Client: Job Started (job_id, blockchain_id, payment_address)
+    deactivate AgentAPI
 
     Client->>Cardano Blockchain: Submits Payment to payment_address
     note right of Client: User pays using their Cardano wallet
 
-    Agent API->>Masumi Payment Service: Monitor Payment Status (blockchain_id)
-    activate Agent API
-    activate Masumi Payment Service
+    AgentAPI->>MasumiService: Monitor Payment Status (blockchain_id)
+    activate AgentAPI
+    activate MasumiService
     loop Payment Monitoring
-        Masumi Payment Service-->>Agent API: Payment Status (e.g., pending, confirmed)
+        MasumiService-->>AgentAPI: Payment Status (e.g., pending, confirmed)
     end
-    Masumi Payment Service-->>Agent API: Payment Confirmed
-    deactivate Masumi Payment Service
+    MasumiService-->>AgentAPI: Payment Confirmed
+    deactivate MasumiService
 
-    Agent API->>Agent Core Logic: Execute Task (job_details.input_data)
-    activate Agent Core Logic
-    Agent Core Logic-->>Agent API: Task Result
-    deactivate Agent Core Logic
+    AgentAPI->>CoreLogic: Execute Task (job_details.input_data)
+    activate CoreLogic
+    CoreLogic-->>AgentAPI: Task Result
+    deactivate CoreLogic
 
-    Agent API->>Masumi Payment Service: Complete Payment (blockchain_id, result_hash/data)
-    activate Masumi Payment Service
-    Masumi Payment Service-->>Agent API: Payment Completion Acknowledged
-    deactivate Masumi Payment Service
-    deactivate Agent API
+    AgentAPI->>MasumiService: Complete Payment (blockchain_id, result_hash/data)
+    activate MasumiService
+    MasumiService-->>AgentAPI: Payment Completion Acknowledged
+    deactivate MasumiService
+    deactivate AgentAPI
 
-    Client->>Agent API: GET /status (job_id)
-    activate Agent API
-    Agent API-->>Client: Job Status (completed, result)
-    deactivate Agent API
+    Client->>AgentAPI: GET /status (job_id)
+    activate AgentAPI
+    AgentAPI-->>Client: Job Status (completed, result)
+    deactivate AgentAPI
 ```
 
 This diagram shows the key steps:
