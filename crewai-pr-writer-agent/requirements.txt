@@ -6,3 +6,6 @@ masumi
 pydantic
 python-multipart
 httpx
+boto3
+uuid
+crewai[tools]

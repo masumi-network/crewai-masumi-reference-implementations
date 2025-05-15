@@ -1,4 +1,6 @@
 import os
+import boto3
+import botocore
 import uvicorn
 import uuid
 from dotenv import load_dotenv
@@ -8,6 +10,7 @@ from masumi.config import Config
 from masumi.payment import Payment, Amount
 from crew_definition import ResearchCrew
 from logging_config import setup_logging
+from datetime import datetime
 
 # Configure logging
 logger = setup_logging()
@@ -56,13 +59,14 @@ class StartJobRequest(BaseModel):
             "example": {
                 "identifier_from_purchaser": "example_purchaser_123",
                 "input_data": {
-                    "text": "Write a story about a robot learning to paint"
+                    "text": "https://sample_business.com Write a press release about our new product launching next month"
                 }
             }
         }
 
 class ProvideInputRequest(BaseModel):
     job_id: str
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CrewAI Task Execution
@@ -72,12 +76,40 @@ async def execute_crew_task(input_data: str) -> str:
     logger.info(f"Starting CrewAI task with input: {input_data}")
     crew = ResearchCrew(logger=logger)
     result = crew.crew.kickoff(inputs={"text": input_data})
+    result_str = str(result).replace('\u2019', "'")
+    session = boto3.session.Session()
+
+    client = session.client('s3',
+                            endpoint_url = os.getenv('SPACES_ENDPOINT'), # Find your endpoint in the control panel, under Settings. Prepend "https://".
+                            config=botocore.config.Config(s3={'addressing_style': 'virtual'}), # Configures to use subdomain/virtual calling format.
+                            region_name=os.getenv('SPACES_REGION'), # Use the region in your endpoint.
+                            aws_access_key_id= os.getenv('SPACES_KEY'), # Access key pair. You can create access key pairs using the control panel or API.
+                            aws_secret_access_key=os.getenv('SPACES_SECRET')) # Secret access key defined through an environment variable.
+    # Step 3: Call the put_object command and specify the file to upload. # Open the PDF file in binary mode
+    client.put_object(
+        Bucket='pr-writer-agent',  # The path to the directory you want to upload the object to, starting with your Space name.
+        Key=f'{result["filename"]}',  # Object key, referenced whenever you want to access this file later.
+        Body=result_str.encode('utf-8'),  # The object's contents.
+        ACL='public-read', 
+        ContentType='text/plain' # Defines Access-control List (ACL) permissions, such as private or public.
+        )
+
     logger.info("CrewAI task completed successfully")
-    return result
+
+    download_url = f'https://{'pr-writer-agent'}.{os.getenv('SPACES_REGION')}.digitaloceanspaces.com/{result["filename"]}'
+    return download_url
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1) Start Job (MIP-003: /start_job)
 # ─────────────────────────────────────────────────────────────────────────────
+
+@app.post("/force_run")
+async def start_job(data: StartJobRequest):
+    result = await execute_crew_task(data.input_data)
+
+    return result
+
 @app.post("/start_job")
 async def start_job(data: StartJobRequest):
     """ Initiates a job and creates a payment request """
