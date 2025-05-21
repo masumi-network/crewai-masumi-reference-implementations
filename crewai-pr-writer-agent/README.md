@@ -12,3 +12,5 @@ graph TD
     F -->|Performs| G{Generate Press Release};
     G -->|Output| H(Final press Release);
 ```
+
+Sample Work flow for the agent sequence
