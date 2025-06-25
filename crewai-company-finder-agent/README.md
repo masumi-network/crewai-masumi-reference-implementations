@@ -4,7 +4,7 @@ This diagram illustrates the workflow of the Company Finder Crew, detailing the 
 
 ```mermaid
 graph TD
-    A[Input: {Service} Companies in {Country} ending with {.com}] --> CA(Crawler Agent: Search crawler and URL retriever);
+    A[Input: Company Search] --> CA(Crawler Agent: Search crawler and URL retriever);
 
     subgraph "Web Scraping Tools"
         T1[SerperWebCrawler]
