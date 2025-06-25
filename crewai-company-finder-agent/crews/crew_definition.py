@@ -37,8 +37,8 @@ class ResearchCrew():
                                     If there is a country in the input, use that as the search tools country variable as a two letter word. 
                                     EXAMPLE: France -> \"fr\", Poland -> \"pl\", if none are provided, use the default of \"us\"(united states)
                                     If there are any domains in the input (.com, .io, .ie, etc.) then add them to a list and use that in the tool's 'domain' argument, if none are present then default to .com
-                                    For the url argument, get the TYPE of company requested, e.g. \"Companies in Photography\" -> url = \"Photography\", \"Ai healthcare companies\" -> url = \"Ai healtchare\", NOT including the word \"company\" or \"companies\" in the url,
-                                    that will be handled by the agent,so in \"AI companies\" only the attributive noun of AI is to be returned. This goes for any input
+                                    For the url argument,For the \"after\" and \"before\" parameters of the tool, use the dates provided in the input get the TYPE of company requested, e.g. \"Companies in Photography\" -> url = \"Photography\", \"Ai healthcare companies\" -> url = \"Ai healtchare\", NOT including the word \"company\" or \"companies\" in the url,
+                                    that will be handled by the agent, so in \"AI companies\" only the attributive noun of AI is to be returned. This goes for any input
                                     returning that type in the prompt field of the basemodel output
                                       """,
                     expected_output= """A list of company base URLS, nothing else., Only return the root url, for example:https://www.company.com/contact/about-us -> https://www.company.com 
