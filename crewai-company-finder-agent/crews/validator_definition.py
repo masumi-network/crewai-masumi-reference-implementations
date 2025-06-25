@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Task
 from logging_config import get_logger
 from pydantic import BaseModel
-from scrapflyscraper import WebScraper
+from tools.scrapflyscraper import WebScraper
 
 
 

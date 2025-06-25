@@ -10,6 +10,10 @@ from masumi.payment import Payment, Amount
 from crew_definition import ResearchCrew
 from logging_config import setup_logging
 from typing import Generator
+import botocore
+import boto3
+import uuid
+from datetime import datetime
 
 # Configure logging
 logger = setup_logging()
@@ -59,7 +63,8 @@ class StartJobRequest(BaseModel):
             "example": {
                 "identifier_from_purchaser": "example_purchaser_123",
                 "input_data": {
-                    "text": "Write a story about a robot learning to paint"
+                    "text": "Write a story about a robot learning to paint",
+                    "source":"user company URL"
                 }
             }
         }
@@ -71,39 +76,44 @@ class ProvideInputRequest(BaseModel):
 # CrewAI Task Execution
 # ─────────────────────────────────────────────────────────────────────────────
 
-def read_csv_in_chunks(file_path: str, chunk_size: int = 20) -> Generator[pd.DataFrame, None, None]:
-    """Reads a CSV file in chunks and yields each chunk as a DataFrame."""
-    for chunk in pd.read_csv(file_path, chunksize=chunk_size):
-        
-        yield chunk
-
-async def execute_crew_task(file_path: str) -> list[str]:
+async def execute_crew_task(file_path: str, source: str) -> list[str]:
     """ Execute a CrewAI task with Research and Writing Agents using data from a CSV file """
     logger.info(f"Starting CrewAI task with file: {file_path}")
 
-    chunks = []
-    results = []
-    crew = ResearchCrew(logger=logger)
-     # Adjust the input key as needed
+    result = ""
+    filename = datetime.now()
+    crew = ResearchCrew(csv_path=file_path,source=source,logger=logger)
+  
+    processed_chunks = crew.read_csv_in_chunks() 
+
+    for chunk in processed_chunks:
+        output = crew.crew.kickoff(inputs={"text": chunk, "url": source})  # or maybe just output["result"]
+
+# Then navigate as needed if output_data is a list
+        result += output["result"] 
+        result += "\n"
+
+    session = boto3.session.Session()
+    client = session.client('s3',
+                            endpoint_url = os.getenv('DO_SPACE_ENDPOINT'), # Find your endpoint in the control panel, under Settings. Prepend "https://".
+                            config=botocore.config.Config(s3={'addressing_style': 'virtual'}), # Configures to use subdomain/virtual calling format.
+                            region_name=os.getenv('DO_SPACE_REGION'), # Use the region in your endpoint.
+                            aws_access_key_id= os.getenv('DO_SPACE_KEY'), # Access key pair. You can create access key pairs using the control panel or API.
+                            aws_secret_access_key=os.getenv('DO_SPACE_SECRET')) # Secret access key defined through an environment variable.
+        # Step 3: Call the put_object command and specify the file to upload. # Open the PDF file in binary mode
+    client.put_object(
+        Bucket='crewai-outreach-agent',  # The path to the directory you want to upload the object to, starting with your Space name.
+        Key=f'{filename}',  # Object key, referenced whenever you want to access this file later.
+        Body=result.encode('utf-8'),  # The object's contents.
+        ACL='public-read', 
+        ContentType='text/plain' # Defines Access-control List (ACL) permissions, such as private or public.
+        )
+
+    logger.info("CrewAI task completed successfully")
+
+    download_url = f'https://{'crewai-outreach-agent'}.{os.getenv('SPACES_REGION')}.digitaloceanspaces.com/{filename}'
+    return download_url
     
-    # Read the CSV file in chunks
-    for chunk in read_csv_in_chunks(file_path):
-        # Convert the chunk to a string or process it as needed
-        chunk_data = chunk.to_string(index=False)  # Convert DataFrame to string without index
-        chunk_data = chunk_data.replace(" ", "")  # Remove all spaces
-        chunk_data = chunk_data.replace("\n", "")
-        chunk_data = chunk_data.replace("NaN"," ")
-
-        # Uncomment this section when ready to process the chunk with the agent
-        
-        # Print the chunk data and the CHUUUUUUNK message
-        chunks.append(chunk_data)
-
-    for file_chunk in chunks:
-            result = crew.crew.kickoff(inputs={"text": file_chunk})
-            results.append(result) 
-
-    return results
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1) Start Job (MIP-003: /start_job)
@@ -111,7 +121,7 @@ async def execute_crew_task(file_path: str) -> list[str]:
 
 @app.post("/force_run")
 async def force_run(data:StartJobRequest):
-    result = await execute_crew_task(data.input_data.get("text"))
+    result = await execute_crew_task(data.input_data.get("text"),data.input_data.get("source")) 
     return result
 
 @app.post("/start_job")

@@ -1,8 +1,7 @@
 from crewai import Agent, Crew, Task
 from logging_config import get_logger
-import pandas as pd
 from pydantic import BaseModel
-from scrapertool import Scraper
+from tools.scrapertool import Scraper
 
 
 

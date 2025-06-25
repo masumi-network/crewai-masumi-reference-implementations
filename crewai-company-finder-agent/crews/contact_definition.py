@@ -1,8 +1,8 @@
 from crewai import Agent, Crew, Task
 from logging_config import get_logger
 from pydantic import BaseModel
-from scrapflyscraper import WebScraper
-from contacttool import ContactScraper
+from tools.scrapflyscraper import WebScraper
+from tools.contacttool import ContactScraper
 
 class ContactResult(BaseModel):
     contact: str

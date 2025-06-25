@@ -6,10 +6,10 @@ from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from masumi_crewai.config import Config
 from masumi_crewai.payment import Payment, Amount
-from crew_definition import ResearchCrew
-from crunchbase_definition import CrunchbaseCrew
-from validator_definition import ValidatorCrew
-from contact_definition import ContactCrew
+from crews.crew_definition import ResearchCrew
+from crews.crunchbase_definition import CrunchbaseCrew
+from crews.validator_definition import ValidatorCrew
+from crews.contact_definition import ContactCrew
 from logging_config import setup_logging
 import botocore
 import boto3

@@ -1,9 +1,7 @@
 from crewai import Agent, Crew, Task
 from logging_config import get_logger
-import pandas as pd
-from typing import Generator, Type
 from pydantic import BaseModel
-from crunchbase_search import CrunchbaseSearch
+from tools.crunchbase_search import CrunchbaseSearch
 
 
 
