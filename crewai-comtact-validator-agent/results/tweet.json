@@ -1,0 +1,101 @@
+{
+  "created_at": "Fri Feb 03 00:51:10 +0000 2023",
+  "attached_urls": [],
+  "attached_urls2": null,
+  "attached_media": null,
+  "tagged_users": [],
+  "tagged_hashtags": [],
+  "favorite_count": 13,
+  "bookmark_count": 1,
+  "quote_count": 6,
+  "reply_count": 43,
+  "retweet_count": 2,
+  "text": "Which came first, the chicken or the chicken egg?",
+  "is_quote": false,
+  "is_retweet": false,
+  "language": "en",
+  "user_id": "7748752",
+  "id": "1621310291030974465",
+  "conversation_id": "1621310291030974465",
+  "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+  "views": "29583",
+  "poll": {
+    "choice1_label": "Chicken",
+    "choice2_label": "Egg",
+    "end": "2023-02-04T00:51:10Z",
+    "ended": true,
+    "choice2_count": "924",
+    "choice1_count": "394",
+    "choice4_label": "Question has no answer.",
+    "updated": "2023-02-04T00:51:12Z",
+    "duration": "1440",
+    "choice3_count": "123",
+    "choice4_count": "478",
+    "choice3_label": "Exactly the same time"
+  },
+  "user": {
+    "id": "VXNlcjo3NzQ4NzUy",
+    "rest_id": "7748752",
+    "verified": true,
+    "created_at": "Fri Jul 27 00:20:08 +0000 2007",
+    "default_profile": false,
+    "default_profile_image": false,
+    "description": "Let’s skip witty banter & talk deep Qs. \nBooks: https://t.co/hpZgEm55Ma https://t.co/iFs9C3IuOM \nChief Scientist @_futarchy Advisor @MetaDAOProject @butterygg",
+    "entities": {
+      "description": {
+        "urls": [
+          {
+            "display_url": "ageofem.com",
+            "expanded_url": "http://ageofem.com",
+            "url": "https://t.co/hpZgEm55Ma",
+            "indices": [
+              48,
+              71
+            ]
+          },
+          {
+            "display_url": "elephantinthebrain.com",
+            "expanded_url": "http://elephantinthebrain.com",
+            "url": "https://t.co/iFs9C3IuOM",
+            "indices": [
+              72,
+              95
+            ]
+          }
+        ]
+      },
+      "url": {
+        "urls": [
+          {
+            "display_url": "hanson.gmu.edu",
+            "expanded_url": "http://hanson.gmu.edu",
+            "url": "https://t.co/Lu2Vsu871S",
+            "indices": [
+              0,
+              23
+            ]
+          }
+        ]
+      }
+    },
+    "fast_followers_count": 0,
+    "favourites_count": 82222,
+    "followers_count": 109944,
+    "friends_count": 703,
+    "has_custom_timelines": true,
+    "is_translator": false,
+    "listed_count": 1799,
+    "media_count": 655,
+    "name": "Robin Hanson",
+    "normal_followers_count": 109944,
+    "pinned_tweet_ids_str": [],
+    "possibly_sensitive": false,
+    "profile_banner_url": "https://pbs.twimg.com/profile_banners/7748752/1630771768",
+    "profile_interstitial_type": "",
+    "screen_name": "robinhanson",
+    "statuses_count": 64131,
+    "translator_type": "none",
+    "url": "https://t.co/Lu2Vsu871S",
+    "withheld_in_countries": []
+  }
+}

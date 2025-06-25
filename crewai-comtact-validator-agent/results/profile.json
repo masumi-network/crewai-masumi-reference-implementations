@@ -1,0 +1,46 @@
+{
+  "id": "VXNlcjoxODE4NzQzMA==",
+  "rest_id": "18187430",
+  "verified": false,
+  "created_at": "Wed Dec 17 11:48:54 +0000 2008",
+  "default_profile": false,
+  "default_profile_image": false,
+  "description": "Adeptia software enables easy self-service business data integration for non-techie business users. Connect your business customers faster with Adeptia!",
+  "entities": {
+    "description": {
+      "urls": []
+    },
+    "url": {
+      "urls": [
+        {
+          "display_url": "adeptia.com",
+          "expanded_url": "https://adeptia.com",
+          "url": "https://t.co/wyAsPONSFa",
+          "indices": [
+            0,
+            23
+          ]
+        }
+      ]
+    }
+  },
+  "fast_followers_count": 0,
+  "favourites_count": 127,
+  "followers_count": 1439,
+  "friends_count": 858,
+  "has_custom_timelines": false,
+  "is_translator": false,
+  "listed_count": 77,
+  "media_count": 4257,
+  "name": "Adeptia",
+  "normal_followers_count": 1439,
+  "pinned_tweet_ids_str": [],
+  "possibly_sensitive": false,
+  "profile_banner_url": "https://pbs.twimg.com/profile_banners/18187430/1654705224",
+  "profile_interstitial_type": "",
+  "screen_name": "adeptia",
+  "statuses_count": 7686,
+  "translator_type": "none",
+  "url": "https://t.co/wyAsPONSFa",
+  "withheld_in_countries": []
+}
