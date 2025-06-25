@@ -14,7 +14,7 @@ graph TD
     end
 
     CA -- Uses --> T1;
-    SA -- Performs --> WBT{Web Crawler Task};
+    CA -- Performs --> WBT{Web Crawler Task};
 
     WBT -- Returned URLS --> UV(Url Validator agent: URL scraper and analyser);
     UV -- Uses --> T2;
