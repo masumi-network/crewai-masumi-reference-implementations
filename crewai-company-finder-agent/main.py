@@ -64,7 +64,7 @@ class StartJobRequest(BaseModel):
             "example": {
                 "identifier_from_purchaser": "example_purchaser_123",
                 "input_data": {
-                    "text": "AI companies in USA using .io",
+                    "text": "AI companies in USA using .com after 2000-01-01 and before 2025-06-25",
                 }
             }
         }
@@ -93,7 +93,6 @@ async def execute_crew_task(query: str) -> str:
     urls = []
     emails = []
     canonical = []
-
 
     for url in result:
         output = validator.crew.kickoff(inputs={"text":url})
