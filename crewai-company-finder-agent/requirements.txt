@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-dotenv
+crewai
+masumi_crewai
+pydantic
+python-multipart
+httpx
+requests
+beautifulsoup4
+boto3
+botocore
+crewai[tools]
