@@ -26,7 +26,7 @@ graph TD
     CS -- Uses --> T3;
     CS -- Performs CCT{Crunchbase Crawling Task};
 
-    CS -- Companies and Updated Contacts --> CPC(Contact Page Crawler Agent:Contact page crawler and scraper);
+    CCT -- Companies and Updated Contacts --> CPC(Contact Page Crawler Agent:Contact page crawler and scraper);
 
     CPC -- Uses --> T1;
     CPC -- Uses --> T2;
