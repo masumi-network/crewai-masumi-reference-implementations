@@ -36,4 +36,13 @@ graph TD
     
 ```
 
-This graph shows the initial input (Website URL) going to the `Scraper Agent`. This agent uses its specialized tools to perform the `Data Collection Task`. The output of this task (Collected Data & Metrics) is then passed to the `Analyse Agent`, which performs the `Analysis Task`. The resulting `Analysis Report` is then used by the `Optimization Agent` to perform the `Optimization Task`, which finally produces the `Final SEO Report`.
+This graph shows the initial input (Company Search Query) being passed to the `Crawler Agent`. The `Crawler Agent` then performs the `Web Crawler Task` of the query and outputs the resulting URLS. 
+
+These urls then get Scraped by the `URl Validator Agent` to ensure that the URLS are valid, to gather the company's name (especially if the URL redirects) and to check if a contact can be found in the URL, returning a list of `company names` and found `contact addresses`.
+
+Companies without a found contact are handled by the `Crunchbase Search Agent`, performing the `Crunchbase Crawling Task` using the company URLS and finding any contact addresses in the result snippets.
+
+Any companies that still do not have a found contact address are handled by the `Contact Page Crawler Agent`.
+This performs a `Contact Page Crawling and SCraping Task` to search for and scrape possible contact pages for companies, which would have either a contact address or a form to contact the company.
+
+The results all get appended to the `Original Company List` and the `Final Company and Contacts List` is outputted.
