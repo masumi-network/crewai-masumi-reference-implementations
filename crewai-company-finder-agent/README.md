@@ -4,36 +4,34 @@ This diagram illustrates the workflow of the Company Finder Crew, detailing the 
 
 ```mermaid
 graph TD
-    A[Input: Company Search] --> CA(Crawler Agent: Search crawler and URL retriever);
+    A[Input: Company Search] --> CA[Crawler Agent: Search crawler and URL retriever]
 
-    subgraph "Web Scraping Tools"
+    subgraph WebScrapingTools
         T1[SerperWebCrawler]
         T2[WebsiteScraper]
         T3[CrunchbaseSearcher]
         T4[ContactPageCrawler]
     end
 
-    CA -- Uses --> T1;
-    CA -- Performs --> WBT{Web Crawler Task};
+    CA -->|Uses| T1
+    CA -->|Performs| WBT[Web Crawler Task]
+    WBT -->|Returned URLs| UV[Url Validator Agent: URL scraper and analyser]
 
-    WBT -- Returned URLS --> UV(Url Validator agent: URL scraper and analyser);
-    UV -- Uses --> T2;
-    UV -- Performs --> WST{Web Scraping Task};
+    UV -->|Uses| T2
+    UV -->|Performs| WST[Web Scraping Task]
 
-    WST -- Companys and Contacts --> CS(Crunchbase Search Agent:Contact retriever from crunchbase snippets);
-    
+    WST -->|Companies and Contacts| CS[Crunchbase Search Agent: Contact retriever from Crunchbase snippets]
+    CS -->|Uses| T3
+    CS -->|Performs| CCT[Crunchbase Crawling Task]
 
-    CS -- Uses --> T3;
-    CS -- Performs --> CCT{Crunchbase Crawling Task};
+    CCT -->|Companies and Updated Contacts| CPC[Contact Page Crawler Agent: Contact page crawler and scraper]
 
-    CCT -- Companies and Updated Contacts --> CPC(Contact Page Crawler Agent:Contact page crawler and scraper);
+    CPC -->|Uses| T4
+    CPC -->|Uses| T2
+    CPC -->|Performs| CPS[Contact Page Crawling and Scraping Task]
 
-    CPC -- Uses --> T4;
-    CPC -- Uses --> T2;
+    CPS --> FL[Output: Final Company and Contacts List]
 
-    CPC -- Performs --> CPS{Contact Page Crawling and Scraping Task};
-    CPS -- Company and Updated Contacts --> FL[Output: Final Company and Contacts List];
-    
 ```
 
 This graph shows the initial input (Company Search Query) being passed to the `Crawler Agent`. The `Crawler Agent` then performs the `Web Crawler Task` of the query and outputs the resulting URLS. 
